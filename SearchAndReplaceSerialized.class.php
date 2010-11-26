@@ -1,9 +1,10 @@
 <?php 
 
-// $Id:$
-
 /**
  * @file Search and replace in PHP serialized data.
+ * @license http://opensource.org/licenses/lgpl-3.0.html The GNU Lesser General Public License, version 3.0 (LGPLv3)
+ * @author Raphael Huefner http://www.raphaelhuefner.com
+ * Sponsored by Affinity Bridge http://www.affinitybridge.com
  */
 
 class SearchAndReplaceSerialized {
@@ -100,7 +101,7 @@ class SearchAndReplaceSerialized {
         $str = $this->_eatString($len);
         $this->_eatQuote();
         $this->_eatSemicolon();
-        $new_str = str_replace($this->_search, $this->_replace = $replace, $str);
+        $new_str = str_replace($this->_search, $this->_replace, $str);
         $new_len = strlen($new_str);
         return 's:' . $new_len . ':"' . $new_str . '";';
       case 'a':
