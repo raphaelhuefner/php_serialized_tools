@@ -7,22 +7,6 @@
  * Sponsored by Affinity Bridge http://www.affinitybridge.com
  */
 
-class SearchReplaceSerialized extends TransformSerialized {
-  protected $_search = '';
-  protected $_replace = '';
-
-  public function __construct($input='', $search='', $replace='') {
-    parent::__construct($input);
-    $this->_search = $search;
-    $this->_replace = $replace;
-  }
-
-  protected function _handleString($string, array $context=array()) {
-    $new_str = str_replace($this->_search, $this->_replace, $string);
-    return parent::_handleString($new_str, $context);
-  }
-}
-
 class TransformSerialized {
   protected $_index = 0;
   protected $_input = '';
