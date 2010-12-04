@@ -7,7 +7,7 @@
  * Sponsored by Affinity Bridge http://www.affinitybridge.com
  */
 
-class SearchAndReplaceSerialized {
+class SearchReplaceSerialized {
   protected $_input = '';
   protected $_search = '';
   protected $_replace = '';
