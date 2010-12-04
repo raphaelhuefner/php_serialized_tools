@@ -85,15 +85,15 @@ class TransformSerialized {
     return $this->_matchString('}');
   }
 
-  protected function _matchInt() {
+  protected function _matchIntegerStringRepresentation() {
     return $this->_matchRegEx('-?\d+');
   }
 
-  protected function _matchDouble() {
+  protected function _matchDoubleStringRepresentation() {
     return $this->_matchRegEx('[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?');
   }
 
-  protected function _matchBool() {
+  protected function _matchBooleanStringRepresentation() {
     return $this->_matchRegEx('[01]');
   }
 
@@ -103,16 +103,16 @@ class TransformSerialized {
     return $found;
   }
 
-  protected function _outputBooleanSerialized($bool) {
-    return 'b:' . $bool . ';';
+  protected function _outputBooleanSerialized($booleanStringRepresentation) {
+    return 'b:' . $booleanStringRepresentation . ';';
   }
 
-  protected function _outputIntegerSerialized($int) {
-    return 'i:' . $int . ';';
+  protected function _outputIntegerSerialized($integerStringRepresentation) {
+    return 'i:' . $integerStringRepresentation . ';';
   }
 
-  protected function _outputDoubleSerialized($double) {
-    return 'd:' . $double . ';';
+  protected function _outputDoubleSerialized($doubleStringRepresentation) {
+    return 'd:' . $doubleStringRepresentation . ';';
   }
 
   protected function _outputStringSerialized($string) {
@@ -145,16 +145,16 @@ class TransformSerialized {
     return 'N;';
   }
 
-  protected function _handleBoolean($bool, array $context=array()) {
-    return $this->_outputBooleanSerialized($bool);
+  protected function _handleBoolean($booleanStringRepresentation, array $context=array()) {
+    return $this->_outputBooleanSerialized($booleanStringRepresentation);
   }
 
-  protected function _handleInteger($int, array $context=array()) {
-    return $this->_outputIntegerSerialized($int);
+  protected function _handleInteger($integerStringRepresentation, array $context=array()) {
+    return $this->_outputIntegerSerialized($integerStringRepresentation);
   }
 
-  protected function _handleDouble($double, array $context=array()) {
-    return $this->_outputDoubleSerialized($double);
+  protected function _handleDouble($doubleStringRepresentation, array $context=array()) {
+    return $this->_outputDoubleSerialized($doubleStringRepresentation);
   }
 
   protected function _handleString($string, array $context=array()) {
@@ -186,22 +186,22 @@ class TransformSerialized {
     switch ($type) {
       case 'b': // boolean
         $this->_matchColon();
-        $bool = $this->_matchBool();
+        $booleanStringRepresentation = $this->_matchBooleanStringRepresentation();
         $this->_matchSemicolon();
-        return $this->_handleBoolean($bool, $context);
+        return $this->_handleBoolean($booleanStringRepresentation, $context);
       case 'i': // integer
         $this->_matchColon();
-        $int = $this->_matchInt();
+        $integerStringRepresentation = $this->_matchIntegerStringRepresentation();
         $this->_matchSemicolon();
-        return $this->_handleInteger($int, $context);
+        return $this->_handleInteger($integerStringRepresentation, $context);
       case 'd': // double (also known as float)
         $this->_matchColon();
-        $double = $this->_matchDouble();
+        $doubleStringRepresentation = $this->_matchDoubleStringRepresentation();
         $this->_matchSemicolon();
-        return $this->_handleDouble($double, $context);
+        return $this->_handleDouble($doubleStringRepresentation, $context);
       case 's': // string
         $this->_matchColon();
-        $len = $this->_matchInt();
+        $len = (int) $this->_matchIntegerStringRepresentation();
         $this->_matchColon();
         $this->_matchQuote();
         $string = $this->_matchStringByLength($len);
@@ -210,41 +210,45 @@ class TransformSerialized {
         return $this->_handleString($string, $context);
       case 'a': // array
         $this->_matchColon();
-        $len = $this->_matchInt();
+        $len = (int) $this->_matchIntegerStringRepresentation();
         $this->_matchColon();
         $this->_matchBraceOpen();
         $subThings = array();
         for ($i = 0; $i < $len; $i++) {
-          $subThings[] = $this->_match(array('isArrayKey' => true, 'parentContext' => $context));
-          $subThings[] = $this->_match(array('isArrayValue' => true, 'parentContext' => $context));
+          $key = $this->_match(array('isArrayKey' => true, 'parentContext' => $context));
+          $value = $this->_match(array('isArrayValue' => true, 'transformedKey' => $key, 'parentContext' => $context));
+          $subThings[] = $key;
+          $subThings[] = $value;
         }
         $this->_matchBraceClose();
         return $this->_handleArray($subThings, $context);
       case 'r': // recursion
         $this->_matchColon();
-        $recursionId = $this->_matchInt();
+        $recursionId = $this->_matchIntegerStringRepresentation();
         $this->_matchSemicolon();
         return $this->_handleRecursion($recursionId, $context);
       case 'R': // same as "r", but we better keep the capitalization, just in case... :-)
         $this->_matchColon();
-        $recursionId = $this->_matchInt();
+        $recursionId = $this->_matchIntegerStringRepresentation();
         $this->_matchSemicolon();
         return $this->_handleRecursionCapitalR($recursionId, $context);
       case 'O': // object
         $this->_matchColon();
-        $classNameLen = $this->_matchInt();
+        $classNameLen = (int) $this->_matchIntegerStringRepresentation();
         $this->_matchColon();
         $this->_matchQuote();
         $className = $this->_matchStringByLength($classNameLen);
         $this->_matchQuote();
         $this->_matchColon();
-        $len = $this->_matchInt();
+        $len = (int) $this->_matchIntegerStringRepresentation();
         $this->_matchColon();
         $this->_matchBraceOpen();
         $subThings = array();
         for ($i = 0; $i < $len; $i++) {
-          $subThings[] = $this->_match(array('isObjectKey' => true, 'className' => $className, 'parentContext' => $context));
-          $subThings[] = $this->_match(array('isObjectValue' => true, 'className' => $className, 'parentContext' => $context));
+          $key = $this->_match(array('isObjectKey' => true, 'className' => $className, 'parentContext' => $context));
+          $value = $this->_match(array('isObjectValue' => true, 'className' => $className, 'transformedKey' => $key, 'parentContext' => $context));
+          $subThings[] = $key;
+          $subThings[] = $value;
         }
         $this->_matchBraceClose();
         return $this->_handleObject($className, $subThings, $context);
