@@ -14,8 +14,6 @@ class PrintFormattedSerialized extends TransformSerialized {
     return str_replace(PHP_EOL, PHP_EOL . $indent, $string);
   }
 
-  
-  
   protected function _outputBooleanSerialized($booleanStringRepresentation) {
     return ('0' == $booleanStringRepresentation) ? 'FALSE' : 'TRUE';
   }
@@ -77,42 +75,4 @@ class PrintFormattedSerialized extends TransformSerialized {
   protected function _outputNullSerialized() {
     return 'NULL';
   }
-
-  protected function _handleBoolean($booleanStringRepresentation, array $context=array()) {
-    return $this->_outputBooleanSerialized($booleanStringRepresentation);
-  }
-
-  protected function _handleInteger($integerStringRepresentation, array $context=array()) {
-    return $this->_outputIntegerSerialized($integerStringRepresentation);
-  }
-
-  protected function _handleDouble($doubleStringRepresentation, array $context=array()) {
-    return $this->_outputDoubleSerialized($doubleStringRepresentation);
-  }
-
-  protected function _handleString($string, array $context=array()) {
-    return $this->_outputStringSerialized($string);
-  }
-
-  protected function _handleArray(array $subThings, array $context=array()) {
-    return $this->_outputArraySerialized($subThings);
-  }
-
-  protected function _handleRecursion($recursionId, array $context=array()) {
-    return $this->_outputRecursionSerialized($recursionId);
-  }
-
-  protected function _handleRecursionCapitalR($recursionId, array $context=array()) {
-    return $this->_outputRecursionSerializedCapitalR($recursionId);
-  }
-
-  protected function _handleObject($className, array $subThings, array $context=array()) {
-    return $this->_outputObjectSerialized($className, $subThings);
-  }
-
-  protected function _handleNull(array $context=array()) {
-    return $this->_outputNullSerialized();
-  }
-
-  
 }
