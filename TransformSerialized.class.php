@@ -1,7 +1,7 @@
 <?php 
 
 /**
- * @file Search and replace in PHP serialized data.
+ * @file Base class for mangling PHP serialized data.
  * @license http://opensource.org/licenses/lgpl-3.0.html The GNU Lesser General Public License, version 3.0 (LGPLv3)
  * @author Raphael Huefner http://www.raphaelhuefner.com
  * Sponsored by Affinity Bridge http://www.affinitybridge.com
