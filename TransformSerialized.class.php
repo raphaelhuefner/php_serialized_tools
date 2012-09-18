@@ -10,6 +10,7 @@
 class TransformSerialized {
   protected $_index = 0;
   protected $_input = '';
+  protected $_maxRecursionId = 0;
 
   public function __construct($input='') {
     $this->_input = $input;
@@ -17,6 +18,11 @@ class TransformSerialized {
 
   public function run() {
     return $this->_match();
+  }
+
+  protected function _getNextRecursionId() {
+    $this->_maxRecursionId++;
+    return $this->_maxRecursionId;
   }
 
   protected function _matchRegEx($regEx) {
@@ -193,6 +199,9 @@ class TransformSerialized {
         $this->_matchSemicolon();
         return $this->_handleString($string, $context);
       case 'a': // array
+        if (! isset($context['recursionId'])) {
+          $context['recursionId'] = $this->_getNextRecursionId();
+        }
         $this->_matchColon();
         $len = (int) $this->_matchIntegerStringRepresentation();
         $this->_matchColon();
@@ -200,7 +209,7 @@ class TransformSerialized {
         $subThings = array();
         for ($i = 0; $i < $len; $i++) {
           $key = $this->_match(array('isArrayKey' => true, 'parentContext' => $context));
-          $value = $this->_match(array('isArrayValue' => true, 'transformedKey' => $key, 'parentContext' => $context));
+          $value = $this->_match(array('isArrayValue' => true, 'transformedKey' => $key, 'recursionId' => $this->_getNextRecursionId(), 'parentContext' => $context));
           $subThings[] = $key;
           $subThings[] = $value;
         }
@@ -217,6 +226,9 @@ class TransformSerialized {
         $this->_matchSemicolon();
         return $this->_handleRecursionCapitalR($recursionId, $context);
       case 'O': // object
+        if (! isset($context['recursionId'])) {
+          $context['recursionId'] = $this->_getNextRecursionId();
+        }
         $this->_matchColon();
         $classNameLen = (int) $this->_matchIntegerStringRepresentation();
         $this->_matchColon();
@@ -230,7 +242,7 @@ class TransformSerialized {
         $subThings = array();
         for ($i = 0; $i < $len; $i++) {
           $key = $this->_match(array('isObjectKey' => true, 'className' => $className, 'parentContext' => $context));
-          $value = $this->_match(array('isObjectValue' => true, 'className' => $className, 'transformedKey' => $key, 'parentContext' => $context));
+          $value = $this->_match(array('isObjectValue' => true, 'className' => $className, 'transformedKey' => $key, 'recursionId' => $this->_getNextRecursionId(), 'parentContext' => $context));
           $subThings[] = $key;
           $subThings[] = $value;
         }
